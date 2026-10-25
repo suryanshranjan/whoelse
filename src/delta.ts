@@ -3,7 +3,7 @@
 // any worktree on this machine whether or not its agent has hooks.
 
 import { basename } from 'node:path';
-import { baseBranch, changedFiles, fileAt, fileInTree, forkPoint, type Worktree } from './git.js';
+import { baseBranch, changedFiles, fileAt, fileInTree, forkPoint, tryGit, type Worktree } from './git.js';
 import { langFor, parseSymbols, type Def, type FileSymbols, type Ref } from './symbols.js';
 
 export interface DefAt extends Def {
@@ -30,17 +30,28 @@ export function simpleName(name: string): string {
   return name.slice(name.lastIndexOf('.') + 1);
 }
 
+// A live worktree: committed and uncommitted work, read from disk.
 export async function worktreeDelta(wt: Worktree, base = baseBranch(wt.path)): Promise<Delta> {
-  const label = wt.branch ?? basename(wt.path);
   const from = forkPoint(wt, base);
-  const delta: Delta = { worktree: wt.path, label, base: from, removed: [], renamed: [], signature: [], edited: [], added: [], uses: [] };
+  return build(wt.path, wt.branch ?? basename(wt.path), from, from ? changedFiles(wt.path, from) : [], (f) => fileInTree(wt.path, f));
+}
+
+// A branch tip (for CI, or branches with no worktree here): committed work only.
+export async function branchDelta(cwd: string, branch: string, base = baseBranch(cwd)): Promise<Delta> {
+  const from = (base && tryGit(['merge-base', branch, base], cwd)) || null;
+  const files = from ? (tryGit(['diff', '--name-only', '--no-renames', from, branch], cwd) ?? '').split('\n').filter(Boolean) : [];
+  return build(cwd, branch, from, files, (f) => fileAt(cwd, branch, f));
+}
+
+async function build(cwd: string, label: string, from: string | null, files: string[], read: (f: string) => string | null): Promise<Delta> {
+  const delta: Delta = { worktree: cwd, label, base: from, removed: [], renamed: [], signature: [], edited: [], added: [], uses: [] };
   if (!from) return delta;
   const before = new Map<string, FileSymbols>();
   const after = new Map<string, FileSymbols>();
-  for (const file of changedFiles(wt.path, from)) {
+  for (const file of files) {
     if (!langFor(file)) continue;
-    const old = fileAt(wt.path, from, file);
-    const now = fileInTree(wt.path, file);
+    const old = fileAt(cwd, from, file);
+    const now = read(file);
     if (old !== null) before.set(file, (await parseSymbols(file, old)) ?? { defs: [], refs: [] });
     if (now !== null) after.set(file, (await parseSymbols(file, now)) ?? { defs: [], refs: [] });
   }
