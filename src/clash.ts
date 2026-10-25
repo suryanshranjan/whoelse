@@ -94,9 +94,10 @@ export function describe(c: Clash): string {
   switch (c.kind) {
     case 'gone': {
       const what = c.to ? `renamed ${c.symbol} → ${c.to}` : `removed ${c.symbol}`;
+      // It still exists on this branch, so the fix is about the merge, not the code here.
       return c.actor === 'them'
-        ? `the agent on ${c.other} ${what} (${c.def.file}). You added ${calls}: ${where(c.uses)}. → ${c.to ? `use ${simpleName(c.to)}` : 'stop depending on it'}, or coordinate with ${c.other}.`
-        : `you ${what}, but the agent on ${c.other} added ${calls}: ${where(c.uses)}. Their branch breaks when merged with yours. → keep ${simpleName(c.symbol)} as an alias, or coordinate with ${c.other}.`;
+        ? `the agent on ${c.other} ${what} (${c.def.file}). You added ${calls}: ${where(c.uses)}. These break once both branches are merged. → ${c.to ? `rebase onto ${c.other} and use ${simpleName(c.to)}, or have ${c.other} keep ${simpleName(c.symbol)} as an alias` : `avoid depending on ${simpleName(c.symbol)}, or have ${c.other} keep it`}. Tell the user which.`
+        : `you ${what}, but the agent on ${c.other} added ${calls}: ${where(c.uses)}. Their branch breaks when merged with yours. → keep ${simpleName(c.symbol)} as an alias${c.to ? ` of ${simpleName(c.to)}` : ''}, or tell the user ${c.other} must follow the change.`;
     }
     case 'signature':
       return c.actor === 'them'

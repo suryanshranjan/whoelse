@@ -30,7 +30,7 @@ test('rename on one side, new calls on the other: both sides are told', async ()
   assert.equal(forB.length, 1);
   assert.equal(forB[0].kind, 'gone');
   assert.equal(forB[0].actor, 'them');
-  assert.match(say(forB[0]), /the agent on feat-payouts renamed chargeCard → chargePayment \(pay\.ts\)\. You added 3 uses of chargeCard: refunds\.ts:1, refunds\.ts:3, refunds\.ts:4\. → use chargePayment/);
+  assert.match(say(forB[0]), /the agent on feat-payouts renamed chargeCard → chargePayment \(pay\.ts\)\. You added 3 uses of chargeCard: refunds\.ts:1, refunds\.ts:3, refunds\.ts:4\. These break once both branches are merged\. → rebase onto feat-payouts and use chargePayment, or have feat-payouts keep chargeCard as an alias/);
 
   const forA = findClashes(a, b);
   assert.equal(forA.length, 1);

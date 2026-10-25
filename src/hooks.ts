@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { stateDir } from './git.js';
 import { describe, type Clash } from './clash.js';
 import { scan, unstopped, untold } from './scan.js';
+import { baseCommand } from './commands/init.js';
 
 export type Agent = 'claude-code' | 'codex' | 'antigravity';
 
@@ -23,7 +24,7 @@ interface Input {
 
 export function message(clashes: Clash[], header = 'whoelse: another agent is changing code you depend on'): string {
   const lines = clashes.map((c) => `${c.severity === 'hard' ? '⚠' : '·'} ${describe(c)}`);
-  return [header, ...lines, 'Run `whoelse status` to see every worktree.'].join('\n');
+  return [header, ...lines, `See every worktree: ${baseCommand()} status`].join('\n');
 }
 
 function readInput(): Input {
