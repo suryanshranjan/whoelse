@@ -16,6 +16,7 @@ function summary(d: Delta): string {
   if (d.signature.length) parts.push(`${d.signature.length} signature${d.signature.length === 1 ? '' : 's'} changed`);
   if (d.edited.length) parts.push(`${d.edited.length} edited`);
   if (d.added.length) parts.push(`${d.added.length} added`);
+  if (d.uses.length) parts.push(`${d.uses.length} new call${d.uses.length === 1 ? '' : 's'} or import${d.uses.length === 1 ? '' : 's'}`);
   return parts.length ? parts.join(' · ') : 'no symbol changes';
 }
 
