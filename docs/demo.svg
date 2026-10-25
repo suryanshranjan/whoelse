@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="858" height="471" viewBox="0 0 858 471" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14">
+<rect width="858" height="471" rx="10" fill="#0d1117"/>
+<rect x="12" y="36" width="834" height="138.6" rx="6" fill="#161b22"/>
+<circle cx="22" cy="20" r="6" fill="#ff5f57"/><circle cx="42" cy="20" r="6" fill="#febc2e"/><circle cx="62" cy="20" r="6" fill="#28c840"/>
+<text x="429" y="24" fill="#7d8590" font-size="12" text-anchor="middle">real output · Claude Code and Antigravity in parallel worktrees</text>
+<text xml:space="preserve" x="24.0" y="52" fill="#7d8590">agent on feat-receipts, right after it wrote receipts.ts (Antigravity · Gemini 3.8 Flash)</text>
+<text xml:space="preserve" x="24.0" y="73" fill="#79c0ff" font-weight="700">whoelse: another agent is changing code you depend on</text>
+<text xml:space="preserve" x="24.0" y="94" fill="#d29922" font-weight="700">⚠ the agent on feat-payouts renamed chargeCard → chargePayment (pay.ts). You added 2 uses of</text>
+<text xml:space="preserve" x="40.9" y="115" fill="#d29922" font-weight="700">chargeCard: receipts.ts:1, receipts.ts:4. These break once both branches are merged. → rebase</text>
+<text xml:space="preserve" x="40.9" y="136" fill="#d29922" font-weight="700">onto feat-payouts and use chargePayment, or have feat-payouts keep chargeCard as an alias. Tell</text>
+<text xml:space="preserve" x="40.9" y="157" fill="#d29922" font-weight="700">the user which.</text>
+<text xml:space="preserve" x="24.0" y="178" fill="#e6edf3"></text>
+<text xml:space="preserve" x="24.0" y="199" fill="#3fb950" font-weight="700">$</text><text xml:space="preserve" x="40.9" y="199" fill="#e6edf3" font-weight="700">whoelse status</text>
+<text xml:space="preserve" x="24.0" y="220" fill="#79c0ff" font-weight="700">whoelse · 4 branches · base main</text>
+<text xml:space="preserve" x="24.0" y="241" fill="#e6edf3"></text>
+<text xml:space="preserve" x="24.0" y="262" fill="#3fb950">  ✓ main           no symbol changes</text>
+<text xml:space="preserve" x="24.0" y="283" fill="#f85149">  ✗ feat-payouts   renamed chargeCard → chargePayment · 1 edited · 2 new calls or imports</text>
+<text xml:space="preserve" x="24.0" y="304" fill="#f85149">  ✗ feat-receipts  1 added · 2 new calls or imports</text>
+<text xml:space="preserve" x="24.0" y="325" fill="#f85149">  ✗ feat-refunds   1 added · 2 new calls or imports</text>
+<text xml:space="preserve" x="24.0" y="346" fill="#e6edf3"></text>
+<text xml:space="preserve" x="40.9" y="367" fill="#d29922" font-weight="700">⚠ feat-payouts renamed chargeCard → chargePayment (pay.ts); feat-receipts added 2 uses of</text>
+<text xml:space="preserve" x="57.7" y="388" fill="#d29922" font-weight="700">chargeCard: receipts.ts:1, receipts.ts:4</text>
+<text xml:space="preserve" x="40.9" y="409" fill="#d29922" font-weight="700">⚠ feat-payouts renamed chargeCard → chargePayment (pay.ts); feat-refunds added 2 uses of</text>
+<text xml:space="preserve" x="57.7" y="430" fill="#d29922" font-weight="700">chargeCard: refunds.ts:1, refunds.ts:4</text>
+</svg>
