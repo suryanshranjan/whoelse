@@ -91,6 +91,10 @@ export function baseBranch(cwd: string): string | null {
   for (const b of ['main', 'master']) {
     if (tryGit(['rev-parse', '--verify', '--quiet', `refs/heads/${b}`], cwd)) return b;
   }
+  // CI checkouts often have only the remote branches
+  for (const b of ['origin/main', 'origin/master']) {
+    if (tryGit(['rev-parse', '--verify', '--quiet', `refs/remotes/${b}`], cwd)) return b;
+  }
   return null;
 }
 
