@@ -20,7 +20,7 @@ whoelse reads every worktree of your repo at the symbol level. The moment one ag
 - **both edited**: two branches changed the same function (heads-up, likely conflict)
 - **both added**: two branches added the same name (two agents building the same thing)
 
-Before an agent finishes, a hard clash holds it once, so it reports the problem to you instead of declaring success.
+Before an agent finishes, a hard clash holds it once, so it reports the problem to you instead of declaring success. An agent that keeps the old name alive (`export { chargePayment as chargeCard }`, `chargeCard = charge_payment`) clears the clash.
 
 ```
 npx whoelse init     # once per machine
@@ -66,7 +66,7 @@ Early, and tested live, not only in unit tests:
 
 - **Claude Code**: agent B was told about agent A's rename right after writing the file, and reported it with the lines to fix.
 - **Antigravity** (Gemini 3.8 Flash): the warning arrived before its next model call, Stop held it once, and its final reply flagged the clash.
-- **Codex**: same hook contract as Claude Code; live run pending. Trust the hooks once with `/hooks` inside Codex.
+- **Codex**: warned mid-task, it kept the old name alive with `export { chargePayment as chargeCard }`. That run also found a false alarm (an alias did not count as keeping the name), since fixed. Trust the hooks once with `/hooks` inside Codex.
 
 Languages: TypeScript, TSX, JavaScript, Python. Not yet: type-level clashes (changed return types, interface fields), other languages.
 
