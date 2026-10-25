@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { worktreeDelta } from '../src/delta.js';
+import { branchDelta, worktreeDelta } from '../src/delta.js';
+import { execFileSync } from 'node:child_process';
 import { describe as say, findClashes } from '../src/clash.js';
 import { worktrees } from '../src/git.js';
 import { fixture } from './fixture.js';
@@ -66,4 +67,17 @@ test('no clash when the other side only touched unrelated code', async () => {
   writeFileSync(join(f.b, 'notes.ts'), 'export const n = 1;\n');
   const { a, b } = await deltas(f);
   assert.deepEqual(findClashes(b, a), []);
+});
+
+test('branch tips: committed work compared without worktrees (CI)', async () => {
+  const f = fixture();
+  writeFileSync(join(f.a, 'pay.ts'), readFileSync(join(f.a, 'pay.ts'), 'utf8').replace('chargeCard', 'chargePayment'));
+  writeFileSync(join(f.b, 'refunds.ts'), 'import { chargeCard } from "./pay";\nchargeCard("a", 1);\n');
+  for (const d of [f.a, f.b]) {
+    execFileSync('git', ['add', '-A'], { cwd: d });
+    execFileSync('git', ['commit', '-q', '-m', 'work'], { cwd: d });
+  }
+  const a = await branchDelta(f.main, 'feat-payouts');
+  const b = await branchDelta(f.main, 'feat-refunds');
+  assert.deepEqual(findClashes(b, a).map((c) => `${c.kind}:${c.symbol}`), ['gone:chargeCard']);
 });
