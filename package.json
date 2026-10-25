@@ -1,0 +1,51 @@
+{
+  "name": "whoelse",
+  "version": "0.0.1",
+  "description": "Parallel coding agents merge cleanly and still break each other. whoelse warns an agent the moment another one renames, deletes or changes a function it is using.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "whoelse": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "grammars"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "node --test --import tsx \"tests/*.test.ts\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "antigravity",
+    "coding-agents",
+    "parallel-agents",
+    "git-worktree",
+    "merge-conflicts",
+    "tree-sitter"
+  ],
+  "dependencies": {
+    "web-tree-sitter": "^0.27.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "author": "Suryansh Ranjan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suryanshranjan/whoelse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/suryanshranjan/whoelse/issues"
+  },
+  "homepage": "https://github.com/suryanshranjan/whoelse#readme"
+}

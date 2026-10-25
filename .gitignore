@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+.env
+.env.*
+*.pem
+*.key
+.DS_Store
+# local state never belongs in the repo
+.git/whoelse/
+*.tgz
