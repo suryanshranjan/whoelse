@@ -5,7 +5,7 @@
 
 import { baseBranch, repoRoot, worktrees } from '../git.js';
 import { branchDelta, worktreeDelta, type Delta } from '../delta.js';
-import { describe, findClashes, type Clash } from '../clash.js';
+import { describeNeutral, findClashes, type Clash } from '../clash.js';
 
 function summary(d: Delta): string {
   const parts: string[] = [];
@@ -45,7 +45,7 @@ function print(r: Report, base: string | null): void {
   out.push('');
   if (r.clashes.length === 0) out.push('  no clashes');
   for (const { in: where, clash } of r.clashes) {
-    out.push(`  ${clash.severity === 'hard' ? '⚠' : '·'} [${where}] ${describe(clash)}`);
+    out.push(`  ${clash.severity === 'hard' ? '⚠' : '·'} ${describeNeutral(clash, where)}`);
   }
   process.stdout.write(out.join('\n') + '\n');
 }

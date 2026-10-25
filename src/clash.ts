@@ -109,6 +109,24 @@ export function describe(c: Clash): string {
   }
 }
 
+// The same clash for a report, naming both branches (`mine` is the branch
+// the clash was computed for).
+export function describeNeutral(c: Clash, mine: string): string {
+  const [changer, user] = c.actor === 'them' ? [c.other, mine] : [mine, c.other];
+  const n = c.uses.length;
+  const calls = `${n} use${n === 1 ? '' : 's'} of ${simpleName(c.symbol)}`;
+  switch (c.kind) {
+    case 'gone':
+      return `${changer} ${c.to ? `renamed ${c.symbol} → ${c.to}` : `removed ${c.symbol}`} (${c.def.file}); ${user} added ${calls}: ${where(c.uses)}`;
+    case 'signature':
+      return `${changer} changed ${c.symbol}(${trimParens(c.def.params)}) to take ${arity(c.def)}; ${user} added calls that don't match: ${where(c.uses)}`;
+    case 'both-edited':
+      return `${mine} and ${c.other} both changed ${c.symbol} in ${c.def.file}`;
+    case 'both-added':
+      return `${mine} and ${c.other} both added ${c.symbol}`;
+  }
+}
+
 function trimParens(p: string): string {
   return p.replace(/^\(/, '').replace(/\)$/, '');
 }
