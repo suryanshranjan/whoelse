@@ -1,6 +1,6 @@
 {
   "name": "whoelse",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Parallel coding agents merge cleanly and still break each other. whoelse warns an agent the moment another one renames, deletes or changes a function it is using.",
   "license": "Apache-2.0",
   "type": "module",
