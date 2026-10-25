@@ -20,6 +20,7 @@ export interface Def {
   minArgs: number;
   maxArgs: number; // Infinity with a rest parameter
   bodyHash: string;
+  aliasOf?: string; // another name for this definition (export { a as b }, const b = a)
 }
 
 export interface Ref {
@@ -161,9 +162,9 @@ function jsSymbols(root: Node, source: string): FileSymbols {
           if (mname && mname !== 'constructor') callable(`${name}.${mname}`, 'method', m, m);
           if (mname === 'constructor') {
             // `new Name(...)` is checked against the constructor's arity
-            const ctor = defs[defs.length - 1];
+            const cls = defs.find((d) => d.name === name && d.kind === 'class')!;
             const { min, max } = jsArity(m.childForFieldName('parameters'));
-            Object.assign(ctor, { params: norm(m.childForFieldName('parameters')?.text ?? ''), minArgs: min, maxArgs: max });
+            Object.assign(cls, { params: norm(m.childForFieldName('parameters')?.text ?? ''), minArgs: min, maxArgs: max });
           }
         }
         if (!body?.namedChildren.some((m) => m?.type === 'method_definition' && m.childForFieldName('name')?.text === 'constructor')) {
@@ -190,6 +191,20 @@ function jsSymbols(root: Node, source: string): FileSymbols {
             callable(id.text, 'function', value, d);
           } else {
             plain(id.text, 'const', d);
+            if (value?.type === 'identifier') defs[defs.length - 1].aliasOf = value.text; // const old = renamed
+          }
+        }
+        return;
+      }
+      case 'export_clause': {
+        // export { chargePayment as chargeCard }: the old name lives on
+        for (const s of n.namedChildren) {
+          if (s?.type !== 'export_specifier') continue;
+          const name = s.childForFieldName('name')?.text;
+          const alias = s.childForFieldName('alias')?.text;
+          if (name && alias && alias !== name) {
+            plain(alias, 'const', s);
+            defs[defs.length - 1].aliasOf = name;
           }
         }
         return;
@@ -314,7 +329,8 @@ function pythonSymbols(root: Node, source: string): FileSymbols {
       const a = n.namedChildren[0];
       const left = a?.type === 'assignment' ? a.childForFieldName('left') : null;
       if (left?.type === 'identifier') {
-        defs.push({ name: left.text, kind: 'const', line: n.startPosition.row + 1, params: '', minArgs: 0, maxArgs: 0, bodyHash: hash(n.text) });
+        const right = a?.childForFieldName('right');
+        defs.push({ name: left.text, kind: 'const', line: n.startPosition.row + 1, params: '', minArgs: 0, maxArgs: 0, bodyHash: hash(n.text), ...(right?.type === 'identifier' ? { aliasOf: right.text } : {}) });
       }
     }
   }

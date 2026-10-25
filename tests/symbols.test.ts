@@ -62,3 +62,10 @@ test('python: defs, methods, arity, calls, from-imports', async () => {
 test('unknown extensions are skipped', async () => {
   assert.equal(await parseSymbols('README.md', '# hi'), null);
 });
+
+test('constructor arity lands on the class even after its methods', async () => {
+  const s = await parseSymbols('k.ts', 'export class K {\n  a() {}\n  b(x: number) {}\n  constructor(p: string, q: string) {}\n}\n');
+  const by = Object.fromEntries(s!.defs.map((d) => [d.name, d]));
+  assert.deepEqual([by.K.minArgs, by.K.maxArgs], [2, 2]);
+  assert.deepEqual([by['K.b'].minArgs, by['K.b'].maxArgs], [1, 1]);
+});
