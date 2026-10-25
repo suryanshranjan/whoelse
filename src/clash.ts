@@ -32,7 +32,11 @@ function usesOf(d: DefAt, uses: Use[]): Use[] {
 }
 
 function definesItself(delta: Delta, name: string): boolean {
-  return delta.added.some((d) => simpleName(d.name) === name) || delta.renamed.some((r) => simpleName(r.to) === name);
+  return (
+    delta.added.some((d) => simpleName(d.name) === name) ||
+    delta.renamed.some((r) => simpleName(r.to) === name) ||
+    delta.aliases.includes(name)
+  );
 }
 
 function fits(d: DefAt, u: Use): boolean {

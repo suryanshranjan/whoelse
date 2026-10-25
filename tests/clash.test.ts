@@ -81,3 +81,25 @@ test('branch tips: committed work compared without worktrees (CI)', async () => 
   const b = await branchDelta(f.main, 'feat-refunds');
   assert.deepEqual(findClashes(b, a).map((c) => `${c.kind}:${c.symbol}`), ['gone:chargeCard']);
 });
+
+test('an alias keeps the old name alive (what Codex did live)', async () => {
+  const f = fixture();
+  writeFileSync(join(f.a, 'pay.ts'), readFileSync(join(f.a, 'pay.ts'), 'utf8').replace('chargeCard', 'chargePayment'));
+  // B renames too but keeps the old name as an alias, then uses the old name
+  writeFileSync(join(f.b, 'pay.ts'), 'export function chargePayment(id: string, amt: number) {\n  return id + amt;\n}\n\nexport { chargePayment as chargeCard };\n');
+  writeFileSync(join(f.b, 'invoices.ts'), 'import { chargeCard } from "./pay";\nexport const inv = () => chargeCard("x", 1);\n');
+  const { a, b } = await deltas(f);
+  assert.deepEqual(b.aliases, ['chargeCard']);
+  assert.deepEqual(b.renamed, []); // chargeCard still exists, as an alias with the same signature
+  assert.deepEqual(findClashes(b, a).filter((c) => c.severity === 'hard'), []);
+});
+
+test('renaming with an alias left behind is not a clash for anyone', async () => {
+  const f = fixture();
+  writeFileSync(join(f.a, 'pay.ts'), 'export function chargePayment(id: string, amt: number) {\n  return id + amt;\n}\nexport const chargeCard = chargePayment;\n');
+  writeFileSync(join(f.b, 'refunds.ts'), 'import { chargeCard } from "./pay";\nchargeCard("a", 1);\n');
+  const { a, b } = await deltas(f);
+  assert.deepEqual(a.removed, []);
+  assert.deepEqual(a.renamed, []);
+  assert.deepEqual(findClashes(b, a), []);
+});

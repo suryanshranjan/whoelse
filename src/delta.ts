@@ -24,6 +24,7 @@ export interface Delta {
   edited: DefAt[]; // body changed, same signature
   added: DefAt[];
   uses: Use[]; // references that are new in this worktree
+  aliases: string[]; // old names this worktree newly keeps alive (export { new as old })
 }
 
 export function simpleName(name: string): string {
@@ -44,7 +45,7 @@ export async function branchDelta(cwd: string, branch: string, base = baseBranch
 }
 
 async function build(cwd: string, label: string, from: string | null, files: string[], read: (f: string) => string | null): Promise<Delta> {
-  const delta: Delta = { worktree: cwd, label, base: from, removed: [], renamed: [], signature: [], edited: [], added: [], uses: [] };
+  const delta: Delta = { worktree: cwd, label, base: from, removed: [], renamed: [], signature: [], edited: [], added: [], uses: [], aliases: [] };
   if (!from) return delta;
   const before = new Map<string, FileSymbols>();
   const after = new Map<string, FileSymbols>();
@@ -60,6 +61,9 @@ async function build(cwd: string, label: string, from: string | null, files: str
 
 // Exported for tests: the symbol diff on already-parsed files.
 export function diffSymbols(delta: Delta, before: Map<string, FileSymbols>, after: Map<string, FileSymbols>): Delta {
+  for (const m of [before, after]) for (const s of m.values()) resolveAliases(s);
+  const oldAliases = new Set([...before.values()].flatMap((s) => s.defs.filter((d) => d.aliasOf).map((d) => d.name)));
+  delta.aliases = [...new Set([...after.values()].flatMap((s) => s.defs.filter((d) => d.aliasOf && !oldAliases.has(d.name)).map((d) => d.name)))];
   const flat = (m: Map<string, FileSymbols>): DefAt[] => [...m].flatMap(([file, s]) => s.defs.map((d) => ({ ...d, file })));
   const oldDefs = flat(before);
   const newDefs = flat(after);
@@ -116,6 +120,15 @@ export function diffSymbols(delta: Delta, before: Map<string, FileSymbols>, afte
   }
   delta.uses.sort((x, y) => (x.file === y.file ? x.line - y.line : x.file < y.file ? -1 : 1));
   return delta;
+}
+
+// An alias stands for its target: same kind, parameters and body.
+function resolveAliases(s: FileSymbols): void {
+  for (const d of s.defs) {
+    if (!d.aliasOf) continue;
+    const t = s.defs.find((x) => x.name === d.aliasOf && !x.aliasOf);
+    if (t) Object.assign(d, { kind: t.kind, params: t.params, minArgs: t.minArgs, maxArgs: t.maxArgs, bodyHash: t.bodyHash });
+  }
 }
 
 function refKey(r: Ref): string {
